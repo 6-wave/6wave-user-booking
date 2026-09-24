@@ -1,0 +1,18 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Deploy: push this repo to GitHub/GitLab, then in Render choose New + → Blueprint.
+services:
+  - type: web
+    name: pool-party-booking
+    runtime: node
+    plan: free # free instances sleep after 15 min idle; use "starter" on event day
+    # Bun is installed automatically because bun.lock is in the repo root;
+    # its version comes from .bun-version and Node's from .node-version.
+    buildCommand: bun install --frozen-lockfile && bun run build
+    startCommand: bun run start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      # Leave empty while the app runs on mock data. When the ASP.NET API is
+      # ready, set its public base URL here (never put secrets in NEXT_PUBLIC_*).
+      - key: NEXT_PUBLIC_API_BASE_URL
+        sync: false
