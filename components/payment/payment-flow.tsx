@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { useRegistration } from "@/hooks/use-registration";
 import { usePaymentFlow } from "@/hooks/use-payment-flow";
-import { EVENT } from "@/lib/event";
+import { getTicket } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 import { CheckoutSurface } from "./checkout-surface";
 import { PaymentSummary } from "./payment-summary";
@@ -172,7 +172,7 @@ export function PaymentFlow({
     const busy = state.phase === "initializing" || state.phase === "checkout";
     content = (
       <div className="space-y-4">
-        <PaymentSummary registration={data} feeNaira={EVENT.feeNaira} />
+        <PaymentSummary registration={data} />
         <FormError
           title="We couldn't start your payment"
           message={state.phase === "error" ? state.message : null}
@@ -194,7 +194,7 @@ export function PaymentFlow({
               </>
             ) : (
               <>
-                <Lock /> Pay {formatNaira(EVENT.feeNaira)}
+                <Lock /> Pay {formatNaira(getTicket(data.ticketType).priceNaira)}
               </>
             )}
           </Swap>

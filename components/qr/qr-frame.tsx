@@ -33,7 +33,7 @@ export function QrFrame({
           )}
         />
       ))}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-white shadow-[0_0_44px_oklch(0.75_0.12_190/0.45)] ring-1 ring-border">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-white shadow-[0_0_48px_oklch(0.58_0.235_27/0.55)] ring-1 ring-white/20">
         {children}
         {scanning ? (
           <div

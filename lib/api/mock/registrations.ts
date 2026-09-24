@@ -19,7 +19,7 @@ import { latency } from "./latency";
 
 // Demo triggers for exercising error states:
 //   register with an email starting "error@"  -> server error
-//   look up reference POOL-00000              -> server error
+//   look up reference WAVE-00000              -> server error
 const SERVER_ERROR = "Something went wrong on our side. Please try again.";
 
 function toRegistration(record: MockRegistration): Registration {
@@ -27,6 +27,7 @@ function toRegistration(record: MockRegistration): Registration {
     id: record.id,
     reference: record.reference,
     displayName: toDisplayName(record.fullName),
+    ticketType: record.ticketType,
     paymentStatus: record.paymentStatus,
     status: record.status,
     createdAt: record.createdAt,
@@ -46,6 +47,7 @@ export async function createRegistration(
     fullName: input.fullName,
     phone: input.phone,
     email: input.email,
+    ticketType: input.ticketType,
     paymentStatus: "PENDING",
     status: "CONFIRMED",
     qrToken: makeQrToken(),

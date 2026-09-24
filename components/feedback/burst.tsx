@@ -2,7 +2,7 @@
 
 import { m } from "motion/react";
 
-const COLORS = ["bg-sun", "bg-aqua", "bg-coral", "bg-palm", "bg-gold"];
+const COLORS = ["bg-red", "bg-ember", "bg-cream", "bg-white", "bg-red-bright"];
 const COUNT = 22;
 const GOLDEN_ANGLE = 137.508;
 

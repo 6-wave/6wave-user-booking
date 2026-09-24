@@ -14,6 +14,7 @@ import { EVENT } from "@/lib/event";
 import { cn } from "@/lib/utils";
 import type { PaymentStatus } from "@/types/registration";
 import { DetailList, DetailRow } from "./detail-list";
+import { TicketBadge } from "./ticket-badge";
 import { ErrorCard, LoadingCard, NotFoundCard } from "./resource-states";
 
 /**
@@ -113,12 +114,19 @@ export function RegistrationStatus({ id }: { id: string }) {
               {registration.reference}
             </span>
           </DetailRow>
+          <DetailRow label="Ticket">
+            <TicketBadge type={registration.ticketType} />
+          </DetailRow>
           <DetailRow label="Payment">
             <PaymentBadge status={registration.paymentStatus} />
           </DetailRow>
-          <DetailRow label="Event">{EVENT.name}</DetailRow>
-          <DetailRow label="Date">{EVENT.date}</DetailRow>
-          <DetailRow label="Location">{EVENT.location}</DetailRow>
+          <DetailRow label="Event">
+            {EVENT.name}: {EVENT.subtitle}
+          </DetailRow>
+          <DetailRow label="Date">
+            {EVENT.date}, {EVENT.time}
+          </DetailRow>
+          <DetailRow label="Venue">{EVENT.venue}</DetailRow>
         </DetailList>
       </StaggerItem>
 

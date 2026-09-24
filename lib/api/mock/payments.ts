@@ -3,7 +3,7 @@ import type {
   PaymentTransaction,
   PaymentTransactionStatus,
 } from "@/types/payment";
-import { EVENT } from "@/lib/event";
+import { getTicket } from "@/lib/event";
 import { ApiError } from "../client";
 import { makeId, readDb, writeDb } from "./db";
 import { latency } from "./latency";
@@ -21,11 +21,12 @@ export async function initializePayment(
   if (registration.paymentStatus === "PAID")
     throw new ApiError("This registration is already paid.", 409);
 
+  const amount = getTicket(registration.ticketType).priceNaira;
   const reference = makeId("PAY");
   db.payments.push({
     reference,
     registrationId,
-    amount: EVENT.feeNaira,
+    amount,
     status: "PENDING",
   });
   writeDb(db);
@@ -33,7 +34,7 @@ export async function initializePayment(
   return {
     reference,
     authorizationUrl: `mock://checkout/${reference}`,
-    amount: EVENT.feeNaira,
+    amount,
   };
 }
 

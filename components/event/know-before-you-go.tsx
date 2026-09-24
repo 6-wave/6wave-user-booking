@@ -1,6 +1,4 @@
 import { Clock, QrCode, ShieldCheck, Wallet, type LucideIcon } from "lucide-react";
-import { RingFloat } from "@/components/illustrations/ring-float";
-import { Watermelon } from "@/components/illustrations/watermelon";
 import { Parallax } from "@/components/motion/parallax";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { EVENT } from "@/lib/event";
@@ -8,31 +6,26 @@ import { EVENT } from "@/lib/event";
 // One icon per item in EVENT.knowBeforeYouGo, in the same order.
 const ICONS: LucideIcon[] = [QrCode, ShieldCheck, Wallet, Clock];
 const TINTS = [
-  "bg-sun text-ocean",
-  "bg-aqua text-ocean",
-  "bg-coral text-white",
-  "bg-palm text-white",
+  "bg-red text-white",
+  "bg-ember text-ink",
+  "bg-cream text-ink",
+  "bg-white text-ink",
 ];
 
 export function KnowBeforeYouGo() {
   return (
     <section className="relative mx-auto w-full max-w-5xl px-4 py-14 sm:py-20">
+      {/* A giant faint word that drifts slower than the page. */}
       <Parallax
-        distance={34}
+        distance={-40}
         aria-hidden="true"
-        className="pointer-events-none absolute top-4 right-2 w-16 sm:top-6 sm:right-10 sm:w-36"
+        className="pointer-events-none absolute -top-2 right-0 font-poster text-[7rem] leading-none text-transparent uppercase select-none [-webkit-text-stroke:1px_oklch(0.4_0.08_27/0.55)] sm:text-[11rem]"
       >
-        <Watermelon className="rotate-12 animate-float" />
+        Wave
       </Parallax>
-      <Parallax
-        distance={-26}
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-2 left-2 hidden w-40 opacity-90 sm:block"
-      >
-        <RingFloat id="know-ring" shadow={false} className="animate-float [animation-delay:-2s]" />
-      </Parallax>
+
       <h2 className="text-2xl font-bold sm:text-3xl">Good to know</h2>
-      <p className="mt-2 max-w-[13rem] text-muted-foreground sm:max-w-none">
+      <p className="mt-2 text-muted-foreground">
         A few things that make the day smooth.
       </p>
 

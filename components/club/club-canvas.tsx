@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { MotionValue } from "motion/react";
-import type { WaterOptions, WaterScene, WaterTier } from "@/lib/water/types";
+import type { ClubScene, ClubTier } from "@/lib/club/types";
 import { cn } from "@/lib/utils";
 
 type ConstrainedNavigator = Navigator & {
@@ -11,20 +11,21 @@ type ConstrainedNavigator = Navigator & {
 };
 
 /**
- * Decide how much water this device gets *before* downloading any water code.
+ * Decide how much of the effect this device gets *before* downloading any of
+ * its code.
  *
  *  - none: Data Saver, no WebGL, or ~1 GB of memory: static poster only
- *  - lite: phones, tablets and low-memory devices: a tiny raw-WebGL shader,
- *          no 3D engine (about 5 KB instead of ~133 KB gzipped)
- *  - full: desktops: the three.js scene with 3D floating objects
+ *  - lite: phones, tablets, ≤2 GB devices: lower resolution, ~30 fps, fewer
+ *          beams and embers
+ *  - full: desktops: full detail
  */
-function chooseTier(): WaterTier {
+function chooseTier(): ClubTier {
   const nav = navigator as ConstrainedNavigator;
   if (nav.connection?.saveData) return "none";
   if (nav.deviceMemory !== undefined && nav.deviceMemory <= 1) return "none";
 
   const probe = document.createElement("canvas");
-  const gl = probe.getContext("webgl2") ?? probe.getContext("webgl");
+  const gl = probe.getContext("webgl");
   if (!gl) return "none";
   gl.getExtension("WEBGL_lose_context")?.loseContext();
 
@@ -35,27 +36,20 @@ function chooseTier(): WaterTier {
 }
 
 /**
- * Real-time water (WebGL). Loads after first paint and fades in over the
+ * The hero's WebGL club scene. Loads after first paint and fades in over the
  * static poster; pauses when scrolled away or the tab is hidden; never runs
  * for people who prefer reduced motion (they get one still frame).
  */
-export function WaterCanvas({
+export function ClubCanvas({
   progress,
-  onTier,
   className,
 }: {
-  /** Hero scroll progress, 0..1, drives the camera parallax. */
+  /** Hero scroll progress, 0..1, drives the parallax. */
   progress: MotionValue<number>;
-  /** Tells the hero which tier is live so it can show/hide the SVG floaters. */
-  onTier?: (tier: WaterTier) => void;
   className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [ready, setReady] = useState(false);
-  const onTierRef = useRef(onTier);
-  useEffect(() => {
-    onTierRef.current = onTier;
-  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -70,20 +64,9 @@ export function WaterCanvas({
       const tier = chooseTier();
       if (tier === "none") return;
 
-      const options = {
-        onContextLost: () => {
-          setReady(false);
-          onTierRef.current?.("none");
-        },
-      };
-
-      // Two separate chunks: phones never download the 3D engine.
-      let create: (c: HTMLCanvasElement, o: WaterOptions) => WaterScene;
+      let create: typeof import("@/lib/club/renderer").createClubScene;
       try {
-        create =
-          tier === "full"
-            ? (await import("@/lib/water/scene")).createWaterScene
-            : (await import("@/lib/water/lite")).createLiteWater;
+        create = (await import("@/lib/club/renderer")).createClubScene;
       } catch {
         return; // Keep the poster.
       }
@@ -91,10 +74,15 @@ export function WaterCanvas({
       // don't touch the canvas, or its context would be left lost.
       if (disposed) return;
 
-      let water: WaterScene;
+      let scene: ClubScene;
       try {
-        water = create(canvas, options);
-      } catch {
+        scene = create(canvas, {
+          lite: tier === "lite",
+          onContextLost: () => setReady(false),
+        });
+      } catch (error) {
+        // Not fatal (the poster stays), but worth seeing in the console.
+        console.warn("[club] WebGL scene unavailable, showing the poster:", error);
         return;
       }
 
@@ -103,8 +91,8 @@ export function WaterCanvas({
       let tabVisible = !document.hidden;
       const sync = () => {
         if (reduced) return;
-        if (onScreen && tabVisible) water.start();
-        else water.stop();
+        if (onScreen && tabVisible) scene.start();
+        else scene.stop();
       };
 
       const io = new IntersectionObserver(([entry]) => {
@@ -114,8 +102,8 @@ export function WaterCanvas({
       io.observe(host);
 
       const ro = new ResizeObserver(() => {
-        water.resize();
-        if (reduced) water.renderOnce();
+        scene.resize();
+        if (reduced) scene.renderOnce();
       });
       ro.observe(canvas);
 
@@ -127,38 +115,31 @@ export function WaterCanvas({
 
       const stopProgress = reduced
         ? () => {}
-        : progress.on("change", (v) => water.setScroll(v));
+        : progress.on("change", (v) => scene.setScroll(v));
 
-      let lastTrail = 0;
       const onMove = (event: Event) => {
         const e = event as PointerEvent;
         if (e.pointerType !== "mouse" || reduced) return;
         const rect = host.getBoundingClientRect();
-        water.setPointer(
+        scene.setPointer(
           ((e.clientX - rect.left) / rect.width) * 2 - 1,
           ((e.clientY - rect.top) / rect.height) * 2 - 1,
         );
-        const now = performance.now();
-        if (now - lastTrail > 140) {
-          lastTrail = now;
-          water.ripple(e.clientX, e.clientY, 0.07);
-        }
       };
       const onClick = (event: Event) => {
         const e = event as MouseEvent;
         if (reduced) return;
         if ((e.target as Element).closest("a, button, input, select, textarea"))
           return;
-        water.ripple(e.clientX, e.clientY, 0.3);
+        scene.pulse(e.clientX, e.clientY);
       };
       host.addEventListener("pointermove", onMove);
       host.addEventListener("click", onClick);
 
-      water.resize();
-      if (reduced) water.renderOnce();
+      scene.resize();
+      if (reduced) scene.renderOnce();
       else sync();
       setReady(true);
-      onTierRef.current?.(tier);
 
       cleanup = () => {
         io.disconnect();
@@ -167,7 +148,7 @@ export function WaterCanvas({
         stopProgress();
         host.removeEventListener("pointermove", onMove);
         host.removeEventListener("click", onClick);
-        water.dispose();
+        scene.dispose();
       };
     })();
 

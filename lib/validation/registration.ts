@@ -3,6 +3,7 @@ import type {
   LookupRegistrationInput,
 } from "@/types/registration";
 import { EVENT } from "@/lib/event";
+import type { TicketType } from "@/types/event";
 import { normalizeNigerianPhone } from "./phone";
 
 export type FieldErrors<T extends string> = Partial<Record<T, string>>;
@@ -15,6 +16,7 @@ export type RegistrationField = "fullName" | "phone" | "email";
 export type LookupField = "reference" | "phone";
 
 export interface RegistrationValues {
+  ticketType: TicketType;
   fullName: string;
   phone: string;
   email: string;
@@ -54,7 +56,7 @@ export function validateEmail(value: string): string | undefined {
 const PREFIX = EVENT.referencePrefix;
 const REFERENCE_PATTERN = new RegExp(`^${PREFIX}-[A-Z0-9]{4,10}$`);
 
-/** "pool 83921", "POOL83921" and "pool-83921" all become "POOL-83921". */
+/** "wave 83921", "WAVE83921" and "wave-83921" all become "WAVE-83921". */
 export function normalizeReference(value: string): string {
   const compact = value.trim().toUpperCase().replace(/[\s\-_]/g, "");
   return compact.startsWith(PREFIX)
@@ -86,6 +88,7 @@ export function validateRegistration(
   return {
     ok: true,
     value: {
+      ticketType: values.ticketType,
       fullName: values.fullName.trim().replace(/\s+/g, " "),
       phone,
       email: values.email.trim().toLowerCase(),

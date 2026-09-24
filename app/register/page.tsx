@@ -3,9 +3,9 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
 import { RegistrationForm } from "@/components/registration/registration-form";
-import { WaterBanner } from "@/components/illustrations/water-banner";
+import { ClubBanner } from "@/components/illustrations/club-banner";
 import { Reveal } from "@/components/motion/reveal";
-import { EVENT } from "@/lib/event";
+import { EVENT, LOWEST_PRICE } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Register" };
@@ -24,14 +24,15 @@ export default function RegisterPage() {
         </Reveal>
 
         <Reveal delay={0.06} className="mt-4">
-          <WaterBanner
+          <ClubBanner
             title="Register"
-            pill={`${formatNaira(EVENT.feeNaira)} entry`}
+            pill={`From ${formatNaira(LOWEST_PRICE)}`}
           />
         </Reveal>
 
         <Reveal delay={0.1} className="mt-5 text-muted-foreground">
-          {EVENT.name}. Your QR code is created as soon as you register, and
+          {EVENT.name}: {EVENT.subtitle}. {EVENT.date}, {EVENT.time} at{" "}
+          {EVENT.venue}. Your QR code is created as soon as you register, and
           you can pay right after.
         </Reveal>
 

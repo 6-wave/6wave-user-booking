@@ -3,6 +3,7 @@ import type {
   RegistrationStatus,
 } from "@/types/registration";
 import type { PaymentTransactionStatus } from "@/types/payment";
+import type { TicketType } from "@/types/event";
 import { EVENT } from "@/lib/event";
 
 /**
@@ -17,6 +18,7 @@ export interface MockRegistration {
   fullName: string;
   phone: string;
   email: string;
+  ticketType: TicketType;
   paymentStatus: PaymentStatus;
   status: RegistrationStatus;
   qrToken: string;
@@ -37,30 +39,32 @@ interface MockDb {
   payments: MockPayment[];
 }
 
-const STORAGE_KEY = "pool2026:mock-db:v1";
+const STORAGE_KEY = "soundwave:mock-db:v2";
 
 const SEED: MockDb = {
   registrations: [
     {
       id: "rg_demo_paid_0001",
-      reference: "POOL-83921",
+      reference: "WAVE-83921",
       fullName: "George Omosigho",
       phone: "+2348012345678",
       email: "george@example.com",
+      ticketType: "VIP",
       paymentStatus: "PAID",
       status: "CONFIRMED",
-      qrToken: "POOL-2026-8f72a91b4c3d5e6f708192a3b4c5d6e7",
+      qrToken: "WAVE-2026-8f72a91b4c3d5e6f708192a3b4c5d6e7",
       createdAt: "2026-09-01T09:00:00.000Z",
     },
     {
       id: "rg_demo_pending_0002",
-      reference: "POOL-40417",
+      reference: "WAVE-40417",
       fullName: "Amaka Nwosu",
       phone: "+2348098765432",
       email: "amaka@example.com",
+      ticketType: "REGULAR",
       paymentStatus: "PENDING",
       status: "CONFIRMED",
-      qrToken: "POOL-2026-3c9e1f0a7b2d4c6e8a5f1b3d9e7c2a40",
+      qrToken: "WAVE-2026-3c9e1f0a7b2d4c6e8a5f1b3d9e7c2a40",
       createdAt: "2026-09-02T11:30:00.000Z",
     },
   ],

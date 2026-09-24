@@ -1,23 +1,24 @@
 import { ShieldCheck } from "lucide-react";
 import { formatNaira } from "@/lib/format";
 import { DetailList, DetailRow } from "@/components/registration/detail-list";
+import { TicketBadge } from "@/components/registration/ticket-badge";
+import { getTicket } from "@/lib/event";
 import type { Registration } from "@/types/registration";
 
 /**
  * Presentational only: what the participant is about to pay for. Shows the
- * advertised fee; the backend decides the real amount when checkout starts.
+ * advertised price of their ticket; the backend decides the real amount when
+ * checkout starts.
  */
-export function PaymentSummary({
-  registration,
-  feeNaira,
-}: {
-  registration: Registration;
-  feeNaira: number;
-}) {
+export function PaymentSummary({ registration }: { registration: Registration }) {
+  const feeNaira = getTicket(registration.ticketType).priceNaira;
   return (
     <div className="card-pop rounded-3xl p-5">
       <DetailList>
-        <DetailRow label="Event fee">{formatNaira(feeNaira)}</DetailRow>
+        <DetailRow label="Ticket">
+          <TicketBadge type={registration.ticketType} />
+        </DetailRow>
+        <DetailRow label="Price">{formatNaira(feeNaira)}</DetailRow>
         <DetailRow label="Registration">
           <span className="block">{registration.displayName}</span>
           <span className="block font-mono text-xs font-medium text-muted-foreground">

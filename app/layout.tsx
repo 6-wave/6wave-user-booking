@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import {
+  Anton,
   Bricolage_Grotesque,
   Geist,
   Geist_Mono,
-  Yellowtail,
+  Kaushan_Script,
 } from "next/font/google";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -27,7 +28,15 @@ const display = Bricolage_Grotesque({
   axes: ["opsz", "wdth"],
 });
 
-const script = Yellowtail({
+// Heavy poster face for the event title, like the flyer's "SOUND WAVE".
+const poster = Anton({
+  variable: "--font-poster-face",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+// Dry-brush script for "The Ember Prelude".
+const script = Kaushan_Script({
   variable: "--font-script-face",
   subsets: ["latin"],
   weight: "400",
@@ -35,7 +44,7 @@ const script = Yellowtail({
 
 export const metadata: Metadata = {
   title: {
-    default: `${EVENT.name} · Register`,
+    default: `${EVENT.name}: ${EVENT.subtitle} · Register`,
     template: `%s · ${EVENT.shortName}`,
   },
   description: EVENT.description,
@@ -44,14 +53,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a3b48",
+  themeColor: "#0d0a0a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} ${script.variable} h-full`}
+      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} ${poster.variable} ${script.variable} h-full`}
     >
       <body className="flex min-h-dvh flex-col">
         <MotionProvider>

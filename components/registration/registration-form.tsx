@@ -10,7 +10,9 @@ import { FormError } from "@/components/ui/form-error";
 import { FormField } from "@/components/ui/form-field";
 import { errorMessage } from "@/lib/api/client";
 import { createRegistration } from "@/lib/api/registrations";
+import { DEFAULT_TICKET } from "@/lib/event";
 import { sleep } from "@/lib/sleep";
+import { TicketPicker } from "./ticket-picker";
 import {
   validateEmail,
   validateFullName,
@@ -37,6 +39,7 @@ const FIELD_ORDER: RegistrationField[] = ["fullName", "phone", "email"];
 export function RegistrationForm() {
   const router = useRouter();
   const [values, setValues] = useState<RegistrationValues>({
+    ticketType: DEFAULT_TICKET,
     fullName: "",
     phone: "",
     email: "",
@@ -97,6 +100,12 @@ export function RegistrationForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <TicketPicker
+        value={values.ticketType}
+        onChange={(ticketType) => setValues((current) => ({ ...current, ticketType }))}
+        disabled={busy}
+      />
+
       <FormField
         id="fullName"
         label="Full name"

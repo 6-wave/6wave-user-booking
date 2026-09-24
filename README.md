@@ -1,10 +1,10 @@
-# 6wave Booking: participant web app (Pool Party 2026)
+# 6ixwave Booking: participant web app (Sound Wave: The Ember Prelude)
 
-User-facing frontend for the **Pool Party 2026** registration system (an adults-only, after-dark pool party): register, get a QR code, pay, and look your registration up later. Full product brief: [PROJECT_DESCRIPTION.md](PROJECT_DESCRIPTION.md).
+User-facing frontend for **SOUND WAVE: The Ember Prelude** (AMG presents, with 6ixwave Entertainment; 31st October, 8PM, Jinos Lounge/Club): register, get a QR code, pay, and look your registration up later.
 
 **This repo is frontend only.** There is no backend, admin/staff dashboard, scanner app, auth, or real Paystack integration here. All data currently comes from a browser-side mock (see below).
 
-Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (no `tailwind.config`) · shadcn/ui · `motion` (UI animation + parallax) · `three` (3D water hero, lazy-loaded) · `qrcode`.
+Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (no `tailwind.config`) · shadcn/ui · `motion` (UI animation + parallax) · a hand-written WebGL shader (the club hero) · `qrcode`.
 
 ```bash
 bun install
@@ -14,7 +14,7 @@ bun run build && bun start
 
 ## Before going live
 
-1. **Event details:** edit [lib/event.ts](lib/event.ts). Date, time and venue are currently "to be announced" placeholders. Also confirm with the organizers: the **"18+ only"** badge (`ageNote`), the `knowBeforeYouGo` copy (including "pay at the gate"), and the registration-number prefix (`referencePrefix`, currently `POOL`, so numbers look like `POOL-83921`; the backend must issue the same prefix).
+1. **Event details:** everything is in [lib/event.ts](lib/event.ts), taken from the flyer. Ticket prices are confirmed: **Regular ₦7,000, VIP ₦10,000** (there is no ₦5,000 ticket). Still worth confirming with the organizers: the year (inferred as 2026), the `knowBeforeYouGo` copy (including "pay at the gate"), and the registration-number prefix (`referencePrefix`, currently `WAVE`, so numbers look like `WAVE-83921`; the backend must issue the same prefix).
 2. **Connect the backend:** see below.
 3. Delete `lib/api/mock/` and `components/payment/mock-checkout-sheet.tsx`.
 
@@ -29,7 +29,7 @@ bun run build && bun start
 | `/payment/[id]` | Pay screen. Also handles a `?reference=` return from a hosted checkout |
 | `/lookup` | Find a registration by registration ID + phone |
 
-`[id]` is an opaque backend ID, **not** the `POOL-12345` number (that is short and guessable, so it is only a display value and a lookup credential together with the phone number).
+`[id]` is an opaque backend ID, **not** the `WAVE-12345` number (that is short and guessable, so it is only a display value and a lookup credential together with the phone number).
 
 ## Connecting the ASP.NET Core backend
 
@@ -40,6 +40,7 @@ All network access goes through two files; each function maps to one endpoint an
 
 Set `NEXT_PUBLIC_API_BASE_URL`, swap the mock call for the `apiFetch` line, and the types in [types/](types/) describe what the backend should return. Notes for the backend:
 
+- **Tickets:** `POST /api/registrations` takes `ticketType: "REGULAR" | "VIP"` (with `fullName`, `phone`, `email`), and the registration response echoes `ticketType`. The prices shown in the UI come from [lib/event.ts](lib/event.ts), but the **backend must own the price per tier** and use it for `POST /api/payments/initialize` (whose `amount` the UI shows in checkout). Never trust an amount sent from the browser.
 - The registration response carries a **`displayName`** already shortened (e.g. "George O."); the UI never needs the full name, phone or email again.
 - The QR token is an **opaque, unpredictable string** from `GET …/qr`, rendered as-is. Nothing else is ever encoded in it.
 - Payment status shown in the UI is only what the backend reports. The frontend never marks anything paid itself.
@@ -51,50 +52,61 @@ The only file that changes is [components/payment/checkout-surface.tsx](componen
 
 ## Trying the mock
 
-Data lives in `localStorage` (key `pool2026:mock-db:v1`); clear it to reset.
+Data lives in `localStorage` (key `soundwave:mock-db:v2`); clear it to reset.
 
 | Do this | To see |
 | --- | --- |
-| Look up `POOL-83921` + `08012345678` | A **paid** registration |
-| Look up `POOL-40417` + `08098765432` | A **pending** registration you can pay for |
+| Look up `WAVE-83921` + `08012345678` | A **paid VIP** registration |
+| Look up `WAVE-40417` + `08098765432` | A **pending Regular** registration you can pay for (₦7,000) |
 | Register with an email starting `error@` | Registration server error |
-| Look up `POOL-00000` | Lookup server error |
+| Look up `WAVE-00000` | Lookup server error |
 | Pay, then choose an outcome in the demo checkout | Success / failed / cancelled (success takes ~2.5s to "confirm", like a real webhook) |
 
 ## Structure
 
 ```
 app/          routes (server components; interactivity lives in components/)
-components/   event/ registration/ payment/ qr/ feedback/ illustrations/ layout/ motion/ ui/ (shadcn)
+components/   event/ registration/ payment/ qr/ feedback/ club/ illustrations/ layout/ motion/ ui/ (shadcn)
 hooks/        use-resource, use-registration, use-payment-flow (state machine)
-lib/          api/ (+ mock/), qr/, validation/, event.ts, format.ts
+lib/          api/ (+ mock/), club/, qr/, validation/, event.ts, format.ts
 types/        Registration, payment and event types
 ```
 
+## Brand assets
+
+The 6ixwave Entertainment logo was extracted from the supplied image (background and drop shadow removed) and traced to vector, so it's crisp at any size. It is used in white on the dark UI:
+
+- [public/brand/6ixwave-wordmark-white.svg](public/brand/6ixwave-wordmark-white.svg): header
+- [public/brand/6ixwave-logo-white.svg](public/brand/6ixwave-logo-white.svg): footer (with ENTERTAINMENT)
+- [app/icon.svg](app/icon.svg), [app/favicon.ico](app/favicon.ico), [app/apple-icon.png](app/apple-icon.png): favicon set, a white "6IX" on a black tile (the full wordmark is too wide to read at tab size)
+
+If a higher-resolution or vector original exists, swap it into those files; it would be sharper than this trace of a screenshot.
+
 ## Look and feel
 
-Sun-drenched tropical pool party, taken from the owner's reference posters: turquoise water, mustard-gold and sunshine-yellow type, watermelon coral, palm green, cream (tokens in [app/globals.css](app/globals.css)). **No purple.** Chunky tactile buttons and "sticker" cards (`card-pop`). Copy is suggestive but never explicit, and there are no illustrations of people. The QR itself is always black on plain white so it scans reliably.
+Taken from the flyer: near-black, its red, ember orange and a cream brush-script subtitle, with a heavy poster typeface for the title (tokens in [app/globals.css](app/globals.css)). **No purple** (red and blue light mix into purple, so the light effects stay red / ember / warm white). Chunky tactile buttons and dark "sticker" cards (`card-pop`). No illustrations of people except the abstract crowd silhouette. The QR itself is always black on plain white so it scans reliably.
 
-## The water hero: two tiers
+## The club hero
 
-The landing hero is real-time WebGL water (waves, caustics, sun glints, tap/hover ripples, scroll parallax). What a device gets is decided **before any water code is downloaded**:
+The landing hero is a WebGL scene drawn per pixel by one fragment shader, with no 3D engine: sweeping red/ember laser beams through haze, a rotating mirror-tile disco ball, rising embers on three depths (each moving at its own parallax rate on scroll and mouse), drifting light spots, and a bass-hit shockwave where you tap. A crowd silhouette on its own faster layer sits in front, and the beat is a gentle brightness swell, never a strobe.
 
-| Tier | Who | What runs | JS cost |
-| --- | --- | --- | --- |
-| `full` | Desktops | three.js scene: displaced wave mesh, lit 3D yellow ring, coral ring and beach ball riding the waves, mouse-driven camera sway | ~133 KB gzipped, lazy |
-| `lite` | Phones, tablets, ≤2 GB devices | Hand-written WebGL shader (one full-screen triangle, no engine, no mesh, no lights), ~30 fps cap, reduced resolution that adapts to frame time. Ring, coral ring and beach ball are light animated SVG on a parallax layer | ~5 KB, lazy |
-| `none` | Data Saver, no WebGL, ~1 GB devices | Static poster with the same SVG floaters | 0 |
+What a device gets is decided **before any of its code is downloaded**:
 
-On both live tiers rendering stops when the hero is off-screen or the tab is hidden, and people with reduced-motion get one still frame.
+| Tier | Who | What runs |
+| --- | --- | --- |
+| `full` | Desktops | Full detail (7 beams, 3 ember layers, 22 light spots), mouse parallax and beam sway, drawn at CSS-pixel resolution |
+| `lite` | Phones, tablets, ≤2 GB devices | 4 beams, 2 ember layers, 10 light spots, reduced resolution, ~30 fps cap |
+| `none` | Data Saver, no WebGL, ~1 GB devices | Static poster with CSS beams |
+
+Both live tiers adapt their resolution to frame time, stop rendering when the hero is off-screen or the tab is hidden, and give reduced-motion users one still frame.
 
 | Piece | File |
 | --- | --- |
-| Wave definition (shared by GLSL and JS) | [lib/water/waves.ts](lib/water/waves.ts) |
-| Shared water look + both shaders | [lib/water/shaders.ts](lib/water/shaders.ts) |
-| `full` tier (three.js) | [lib/water/scene.ts](lib/water/scene.ts) |
-| `lite` tier (raw WebGL) | [lib/water/lite.ts](lib/water/lite.ts) |
-| Tier choice, lifecycle, pausing | [components/water/water-canvas.tsx](components/water/water-canvas.tsx) |
-| Parallax layers (sun, water, floaters, palms, waves) | [components/event/hero-stage.tsx](components/event/hero-stage.tsx) |
+| The shader | [lib/club/shader.ts](lib/club/shader.ts) |
+| Renderer (raw WebGL, adaptive quality) | [lib/club/renderer.ts](lib/club/renderer.ts) |
+| Tier choice, lifecycle, pausing | [components/club/club-canvas.tsx](components/club/club-canvas.tsx) |
+| Parallax layers | [components/event/hero-stage.tsx](components/event/hero-stage.tsx) |
+| Crowd, CSS beams, equalizer, poster | [components/illustrations/](components/illustrations/) |
 
 Other sections use lighter scroll parallax ([Parallax](components/motion/parallax.tsx)). Type and spacing scale down on small phones via a fluid root font size in [app/globals.css](app/globals.css) (16px at ~390px wide, 14px floor).
 

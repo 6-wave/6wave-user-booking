@@ -5,13 +5,17 @@ export interface PassImageInput {
   displayName: string;
   reference: string;
   eventName: string;
+  /** "VIP" or "Regular". */
+  ticketLabel: string;
+  isVip: boolean;
   date: string;
   location: string;
 }
 
 const WIDTH = 1080;
-const HEIGHT = 1500;
+const HEADER_HEIGHT = 300;
 const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
 
 function fitText(
   ctx: CanvasRenderingContext2D,
@@ -35,41 +39,52 @@ function fitText(
 /**
  * Renders a shareable PNG of the participant's QR pass. It deliberately leaves
  * out payment status: that can change, and only the backend is authoritative.
+ * The height follows the content, so nothing can overlap.
  */
 export async function createPassImage(input: PassImageInput): Promise<Blob> {
-  const canvas = document.createElement("canvas");
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas is not supported in this browser.");
-
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-  // Header band
-  const gradient = ctx.createLinearGradient(0, 0, WIDTH, 300);
-  gradient.addColorStop(0, "#0a3b48");
-  gradient.addColorStop(1, "#1a9aa0");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, WIDTH, 300);
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#ffd23a";
-  ctx.font = `700 34px ${FONT}`;
-  ctx.fillText("EVENT PASS", WIDTH / 2, 110);
-  ctx.fillStyle = "#ffffff";
-  fitText(ctx, input.eventName, WIDTH / 2, 200, WIDTH - 140, 76, 700);
-
-  // QR code
   const matrix = createQrMatrix(input.token);
   const totalModules = matrix.size + QR_QUIET_ZONE * 2;
   const moduleSize = Math.floor(760 / totalModules);
   const qrSide = moduleSize * totalModules;
   const qrX = Math.round((WIDTH - qrSide) / 2);
-  const qrY = 380;
+  const qrY = HEADER_HEIGHT + 80;
+
+  // Vertical layout, top to bottom, each block with its own room.
+  const nameY = qrY + qrSide + 120;
+  const referenceY = nameY + 88;
+  const pillY = referenceY + 46;
+  const pillH = 64;
+  const dateY = pillY + pillH + 78;
+  const venueY = dateY + 54;
+  const footerY = venueY + 100;
+  const height = footerY + 56;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = WIDTH;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas is not supported in this browser.");
 
   ctx.fillStyle = "#ffffff";
-  ctx.strokeStyle = "#cfe9e6";
+  ctx.fillRect(0, 0, WIDTH, height);
+
+  // Header band
+  const gradient = ctx.createLinearGradient(0, 0, WIDTH, HEADER_HEIGHT);
+  gradient.addColorStop(0, "#0d0a0a");
+  gradient.addColorStop(1, "#a30f14");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, WIDTH, HEADER_HEIGHT);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#f1e6cf";
+  ctx.font = `700 34px ${FONT}`;
+  ctx.fillText("EVENT PASS", WIDTH / 2, 110);
+  ctx.fillStyle = "#ffffff";
+  fitText(ctx, input.eventName, WIDTH / 2, 200, WIDTH - 140, 76, 700);
+
+  // QR code on white, with a soft frame
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "#ead9d5";
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.roundRect(qrX - 20, qrY - 20, qrSide + 40, qrSide + 40, 28);
@@ -90,30 +105,39 @@ export async function createPassImage(input: PassImageInput): Promise<Blob> {
     }
   }
 
-  // Participant details
-  const detailsY = qrY + qrSide + 110;
-  ctx.fillStyle = "#0a3b48";
-  fitText(ctx, input.displayName, WIDTH / 2, detailsY, WIDTH - 140, 60, 700);
+  // Participant
+  ctx.fillStyle = "#0d0a0a";
+  fitText(ctx, input.displayName, WIDTH / 2, nameY, WIDTH - 140, 60, 700);
+  ctx.fillStyle = "#c4121a";
+  fitText(ctx, input.reference, WIDTH / 2, referenceY, WIDTH - 140, 64, 700, MONO);
 
-  ctx.fillStyle = "#0f7f8a";
-  fitText(
-    ctx,
-    input.reference,
-    WIDTH / 2,
-    detailsY + 84,
-    WIDTH - 140,
-    64,
-    700,
-    'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
-  );
+  // Ticket tier: solid for VIP, outlined for Regular
+  const label = `${input.ticketLabel.toUpperCase()} TICKET`;
+  ctx.font = `800 34px ${FONT}`;
+  const pillW = Math.ceil(ctx.measureText(label).width) + 88;
+  const pillX = Math.round((WIDTH - pillW) / 2);
+  ctx.beginPath();
+  ctx.roundRect(pillX, pillY, pillW, pillH, pillH / 2);
+  if (input.isVip) {
+    ctx.fillStyle = "#0d0a0a";
+    ctx.fill();
+    ctx.fillStyle = "#f1e6cf";
+  } else {
+    ctx.strokeStyle = "#0d0a0a";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.fillStyle = "#0d0a0a";
+  }
+  ctx.fillText(label, WIDTH / 2, pillY + pillH / 2 + 12);
 
-  ctx.fillStyle = "#4f7076";
-  fitText(ctx, input.date, WIDTH / 2, detailsY + 160, WIDTH - 140, 34, 500);
-  fitText(ctx, input.location, WIDTH / 2, detailsY + 208, WIDTH - 140, 34, 500);
+  // When and where
+  ctx.fillStyle = "#6b5a58";
+  fitText(ctx, input.date, WIDTH / 2, dateY, WIDTH - 140, 36, 600);
+  fitText(ctx, input.location, WIDTH / 2, venueY, WIDTH - 140, 36, 600);
 
-  ctx.fillStyle = "#88a3a7";
+  ctx.fillStyle = "#9a8987";
   ctx.font = `500 30px ${FONT}`;
-  ctx.fillText("Show this QR code at the entrance", WIDTH / 2, HEIGHT - 60);
+  ctx.fillText("Show this QR code at the entrance", WIDTH / 2, footerY);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(

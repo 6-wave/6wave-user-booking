@@ -1,6 +1,6 @@
 import { Banknote, CalendarDays, MapPin, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
-import { EVENT } from "@/lib/event";
+import { EVENT, LOWEST_PRICE } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 
 function DetailCard({
@@ -38,39 +38,41 @@ function DetailCard({
   );
 }
 
-/** Date, location and price. Overlaps the hero's wave edge for a bit of depth. */
+/** Date, venue and price, straight off the flyer. Overlaps the hero's crowd for depth. */
 export function EventDetails() {
   return (
     <section
       aria-label="Event details"
-      className="relative z-10 mx-auto -mt-14 w-full max-w-5xl px-4 sm:-mt-20"
+      className="relative z-10 mx-auto -mt-16 w-full max-w-5xl px-4 sm:-mt-24"
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <Reveal delay={0.32}>
           <DetailCard
             icon={CalendarDays}
-            tint="bg-sun text-ocean"
+            tint="bg-red text-white"
             label="Date"
             value={EVENT.date}
-            hint={EVENT.time}
+            hint={`${EVENT.time} · ${EVENT.timeLabel}`}
           />
         </Reveal>
         <Reveal delay={0.4}>
           <DetailCard
             icon={MapPin}
-            tint="bg-aqua text-ocean"
-            label="Location"
-            value={EVENT.location}
+            tint="bg-ember text-ink"
+            label="Venue"
+            value={EVENT.venue}
             hint={EVENT.address}
           />
         </Reveal>
         <Reveal delay={0.48}>
           <DetailCard
             icon={Banknote}
-            tint="bg-coral text-white"
-            label="Entry fee"
-            value={formatNaira(EVENT.feeNaira)}
-            hint="No extra charges"
+            tint="bg-cream text-ink"
+            label="Tickets"
+            value={`From ${formatNaira(LOWEST_PRICE)}`}
+            hint={EVENT.tickets
+              .map((t) => `${t.label} ${formatNaira(t.priceNaira)}`)
+              .join(" · ")}
           />
         </Reveal>
       </div>

@@ -9,10 +9,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_4px_0_0_oklch(0.34_0.07_210)] hover:brightness-110 active:translate-y-[3px] active:shadow-[0_1px_0_0_oklch(0.34_0.07_210)]",
-        secondary: "bg-secondary text-secondary-foreground shadow-[0_3px_0_0_oklch(0.85_0.05_190)] hover:brightness-[0.97] active:translate-y-[2px] active:shadow-[0_1px_0_0_oklch(0.85_0.05_190)]",
-        sun: "bg-sun text-ocean shadow-[0_4px_0_0_oklch(0.62_0.13_80)] hover:brightness-105 active:translate-y-[3px] active:shadow-[0_1px_0_0_oklch(0.62_0.13_80)]",
-        glass: "border-2 border-white/70 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20",
+          "bg-primary text-primary-foreground shadow-[0_4px_0_0_oklch(0.36_0.15_27)] hover:brightness-110 active:translate-y-[3px] active:shadow-[0_1px_0_0_oklch(0.36_0.15_27)]",
+        secondary: "bg-secondary text-secondary-foreground shadow-[0_3px_0_0_oklch(0.1_0.01_25)] hover:brightness-125 active:translate-y-[2px] active:shadow-[0_1px_0_0_oklch(0.1_0.01_25)]",
+        glass: "border-2 border-white/60 bg-white/5 text-white backdrop-blur-sm hover:bg-white/15",
         outline: "border-2 border-border bg-card text-foreground hover:bg-muted",
         ghost: "text-foreground hover:bg-muted",
         destructive: "bg-destructive/10 text-destructive hover:bg-destructive/15",

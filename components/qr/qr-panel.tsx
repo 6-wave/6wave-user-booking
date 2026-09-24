@@ -6,7 +6,7 @@ import { Check, Download, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/feedback/spinner";
 import { useRegistrationQr } from "@/hooks/use-registration";
-import { EVENT } from "@/lib/event";
+import { EVENT, getTicket } from "@/lib/event";
 import { cn } from "@/lib/utils";
 import type { Registration } from "@/types/registration";
 import { QrCode } from "./qr-code";
@@ -38,9 +38,11 @@ export function QrPanel({ registration }: { registration: Registration }) {
         token,
         displayName: registration.displayName,
         reference: registration.reference,
-        eventName: EVENT.name,
-        date: EVENT.date,
-        location: EVENT.location,
+        eventName: `${EVENT.name}: ${EVENT.subtitle}`,
+        ticketLabel: getTicket(registration.ticketType).label,
+        isVip: registration.ticketType === "VIP",
+        date: `${EVENT.date} · ${EVENT.time}`,
+        location: EVENT.venue,
       });
       downloadBlob(blob, `${registration.reference}-qr.png`);
       setSave("saved");
