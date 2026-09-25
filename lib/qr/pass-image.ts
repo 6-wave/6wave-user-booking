@@ -5,9 +5,11 @@ export interface PassImageInput {
   displayName: string;
   reference: string;
   eventName: string;
-  /** "VIP" or "Regular". */
-  ticketLabel: string;
-  isVip: boolean;
+  /** What was bought, e.g. "VIP ticket", "Regular group", "Table ₦150k". */
+  pillText: string;
+  premium: boolean;
+  /** e.g. "Guest 2 of 5". Leave out for a single pass. */
+  passLabel?: string;
   date: string;
   location: string;
 }
@@ -52,7 +54,8 @@ export async function createPassImage(input: PassImageInput): Promise<Blob> {
   // Vertical layout, top to bottom, each block with its own room.
   const nameY = qrY + qrSide + 120;
   const referenceY = nameY + 88;
-  const pillY = referenceY + 46;
+  const passLabelY = referenceY + 62;
+  const pillY = input.passLabel ? passLabelY + 34 : referenceY + 46;
   const pillH = 64;
   const dateY = pillY + pillH + 78;
   const venueY = dateY + 54;
@@ -111,14 +114,21 @@ export async function createPassImage(input: PassImageInput): Promise<Blob> {
   ctx.fillStyle = "#c4121a";
   fitText(ctx, input.reference, WIDTH / 2, referenceY, WIDTH - 140, 64, 700, MONO);
 
-  // Ticket tier: solid for VIP, outlined for Regular
-  const label = `${input.ticketLabel.toUpperCase()} TICKET`;
+  // Which guest this pass is (groups)
+  if (input.passLabel) {
+    ctx.fillStyle = "#0d0a0a";
+    ctx.font = `700 40px ${FONT}`;
+    ctx.fillText(input.passLabel, WIDTH / 2, passLabelY);
+  }
+
+  // What was bought: solid for premium, outlined otherwise
+  const label = input.pillText.toUpperCase();
   ctx.font = `800 34px ${FONT}`;
   const pillW = Math.ceil(ctx.measureText(label).width) + 88;
   const pillX = Math.round((WIDTH - pillW) / 2);
   ctx.beginPath();
   ctx.roundRect(pillX, pillY, pillW, pillH, pillH / 2);
-  if (input.isVip) {
+  if (input.premium) {
     ctx.fillStyle = "#0d0a0a";
     ctx.fill();
     ctx.fillStyle = "#f1e6cf";

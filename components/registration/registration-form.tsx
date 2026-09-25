@@ -10,9 +10,9 @@ import { FormError } from "@/components/ui/form-error";
 import { FormField } from "@/components/ui/form-field";
 import { errorMessage } from "@/lib/api/client";
 import { createRegistration } from "@/lib/api/registrations";
-import { DEFAULT_TICKET } from "@/lib/event";
+import { DEFAULT_OPTION_ID } from "@/lib/event";
 import { sleep } from "@/lib/sleep";
-import { TicketPicker } from "./ticket-picker";
+import { PurchasePicker } from "./purchase-picker";
 import {
   validateEmail,
   validateFullName,
@@ -36,10 +36,15 @@ const FIELD_VALIDATORS: Record<
 
 const FIELD_ORDER: RegistrationField[] = ["fullName", "phone", "email"];
 
-export function RegistrationForm() {
+export function RegistrationForm({
+  initialOptionId = DEFAULT_OPTION_ID,
+}: {
+  /** Preselected purchase, e.g. from a "Choose" link on the landing page. */
+  initialOptionId?: string;
+}) {
   const router = useRouter();
   const [values, setValues] = useState<RegistrationValues>({
-    ticketType: DEFAULT_TICKET,
+    optionId: initialOptionId,
     fullName: "",
     phone: "",
     email: "",
@@ -100,9 +105,9 @@ export function RegistrationForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
-      <TicketPicker
-        value={values.ticketType}
-        onChange={(ticketType) => setValues((current) => ({ ...current, ticketType }))}
+      <PurchasePicker
+        value={values.optionId}
+        onChange={(optionId) => setValues((current) => ({ ...current, optionId }))}
         disabled={busy}
       />
 

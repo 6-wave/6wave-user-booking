@@ -3,7 +3,7 @@ import type {
   PaymentTransaction,
   PaymentTransactionStatus,
 } from "@/types/payment";
-import { getTicket } from "@/lib/event";
+import { getOption } from "@/lib/event";
 import { ApiError } from "../client";
 import { makeId, readDb, writeDb } from "./db";
 import { latency } from "./latency";
@@ -21,7 +21,7 @@ export async function initializePayment(
   if (registration.paymentStatus === "PAID")
     throw new ApiError("This registration is already paid.", 409);
 
-  const amount = getTicket(registration.ticketType).priceNaira;
+  const amount = getOption(registration.optionId).priceNaira;
   const reference = makeId("PAY");
   db.payments.push({
     reference,

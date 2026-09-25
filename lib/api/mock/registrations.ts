@@ -4,11 +4,11 @@ import type {
   Registration,
   RegistrationQr,
 } from "@/types/registration";
-import { EVENT } from "@/lib/event";
+import { EVENT, getOption, isOptionId } from "@/lib/event";
 import { ApiError } from "../client";
 import {
   makeId,
-  makeQrToken,
+  makeQrTokens,
   makeReference,
   readDb,
   toDisplayName,
@@ -27,7 +27,7 @@ function toRegistration(record: MockRegistration): Registration {
     id: record.id,
     reference: record.reference,
     displayName: toDisplayName(record.fullName),
-    ticketType: record.ticketType,
+    optionId: record.optionId,
     paymentStatus: record.paymentStatus,
     status: record.status,
     createdAt: record.createdAt,
@@ -40,6 +40,8 @@ export async function createRegistration(
   await latency(900, 1400);
   if (input.email.startsWith("error@")) throw new ApiError(SERVER_ERROR, 500);
 
+  if (!isOptionId(input.optionId)) throw new ApiError("Unknown ticket option.", 422);
+
   const db = readDb();
   const record: MockRegistration = {
     id: makeId("rg"),
@@ -47,10 +49,10 @@ export async function createRegistration(
     fullName: input.fullName,
     phone: input.phone,
     email: input.email,
-    ticketType: input.ticketType,
+    optionId: input.optionId,
     paymentStatus: "PENDING",
     status: "CONFIRMED",
-    qrToken: makeQrToken(),
+    qrTokens: makeQrTokens(getOption(input.optionId).admits),
     createdAt: new Date().toISOString(),
   };
   db.registrations.push(record);
@@ -82,5 +84,5 @@ export async function getRegistrationQr(id: string): Promise<RegistrationQr> {
   await latency(500, 900);
   const record = readDb().registrations.find((r) => r.id === id);
   if (!record) throw new ApiError("Not found", 404);
-  return { registrationId: record.id, token: record.qrToken };
+  return { registrationId: record.id, tokens: record.qrTokens };
 }

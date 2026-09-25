@@ -7,15 +7,15 @@ export function SiteFooter() {
     <footer className="flex flex-col items-center gap-5 border-t border-border py-9 text-center text-xs text-muted-foreground print:hidden">
       <Reservations />
       <Image
-        src="/brand/6ixwave-logo-white.svg"
-        alt="6ixwave Entertainment"
-        width={2131}
-        height={585}
+        src="/brand/all-mask-gang-white.svg"
+        alt="All Mask Gang"
+        width={504}
+        height={728}
         unoptimized
-        className="h-9 w-auto opacity-90"
+        className="h-16 w-auto opacity-90"
       />
       <p>
-        © 2026 {EVENT.organizer} · {EVENT.name}: {EVENT.subtitle}
+        © 2026 {EVENT.name}: {EVENT.subtitle}
       </p>
     </footer>
   );

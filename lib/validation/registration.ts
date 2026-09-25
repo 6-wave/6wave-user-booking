@@ -3,7 +3,6 @@ import type {
   LookupRegistrationInput,
 } from "@/types/registration";
 import { EVENT } from "@/lib/event";
-import type { TicketType } from "@/types/event";
 import { normalizeNigerianPhone } from "./phone";
 
 export type FieldErrors<T extends string> = Partial<Record<T, string>>;
@@ -16,7 +15,7 @@ export type RegistrationField = "fullName" | "phone" | "email";
 export type LookupField = "reference" | "phone";
 
 export interface RegistrationValues {
-  ticketType: TicketType;
+  optionId: string;
   fullName: string;
   phone: string;
   email: string;
@@ -88,7 +87,7 @@ export function validateRegistration(
   return {
     ok: true,
     value: {
-      ticketType: values.ticketType,
+      optionId: values.optionId,
       fullName: values.fullName.trim().replace(/\s+/g, " "),
       phone,
       email: values.email.trim().toLowerCase(),

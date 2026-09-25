@@ -14,7 +14,7 @@ import { EVENT } from "@/lib/event";
 import { cn } from "@/lib/utils";
 import type { PaymentStatus } from "@/types/registration";
 import { DetailList, DetailRow } from "./detail-list";
-import { TicketBadge } from "./ticket-badge";
+import { PurchaseBadge } from "./purchase-badge";
 import { ErrorCard, LoadingCard, NotFoundCard } from "./resource-states";
 
 /**
@@ -114,8 +114,8 @@ export function RegistrationStatus({ id }: { id: string }) {
               {registration.reference}
             </span>
           </DetailRow>
-          <DetailRow label="Ticket">
-            <TicketBadge type={registration.ticketType} />
+          <DetailRow label="Purchase">
+            <PurchaseBadge optionId={registration.optionId} />
           </DetailRow>
           <DetailRow label="Payment">
             <PaymentBadge status={registration.paymentStatus} />

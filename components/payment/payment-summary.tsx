@@ -1,8 +1,8 @@
 import { ShieldCheck } from "lucide-react";
 import { formatNaira } from "@/lib/format";
 import { DetailList, DetailRow } from "@/components/registration/detail-list";
-import { TicketBadge } from "@/components/registration/ticket-badge";
-import { getTicket } from "@/lib/event";
+import { PurchaseBadge } from "@/components/registration/purchase-badge";
+import { getOption } from "@/lib/event";
 import type { Registration } from "@/types/registration";
 
 /**
@@ -11,12 +11,12 @@ import type { Registration } from "@/types/registration";
  * checkout starts.
  */
 export function PaymentSummary({ registration }: { registration: Registration }) {
-  const feeNaira = getTicket(registration.ticketType).priceNaira;
+  const feeNaira = getOption(registration.optionId).priceNaira;
   return (
     <div className="card-pop rounded-3xl p-5">
       <DetailList>
-        <DetailRow label="Ticket">
-          <TicketBadge type={registration.ticketType} />
+        <DetailRow label="Purchase">
+          <PurchaseBadge optionId={registration.optionId} />
         </DetailRow>
         <DetailRow label="Price">{formatNaira(feeNaira)}</DetailRow>
         <DetailRow label="Registration">

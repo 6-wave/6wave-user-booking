@@ -1,6 +1,6 @@
 import { Banknote, CalendarDays, MapPin, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
-import { EVENT, LOWEST_PRICE } from "@/lib/event";
+import { EVENT, LOWEST_PRICE, getCurrentWave } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 
 function DetailCard({
@@ -40,6 +40,7 @@ function DetailCard({
 
 /** Date, venue and price, straight off the flyer. Overlaps the hero's crowd for depth. */
 export function EventDetails() {
+  const wave = getCurrentWave();
   return (
     <section
       aria-label="Event details"
@@ -70,9 +71,11 @@ export function EventDetails() {
             tint="bg-cream text-ink"
             label="Tickets"
             value={`From ${formatNaira(LOWEST_PRICE)}`}
-            hint={EVENT.tickets
-              .map((t) => `${t.label} ${formatNaira(t.priceNaira)}`)
-              .join(" · ")}
+            hint={
+              wave
+                ? `${wave.label} · until ${wave.endsLabel}`
+                : "Tickets, groups of 5 and tables"
+            }
           />
         </Reveal>
       </div>

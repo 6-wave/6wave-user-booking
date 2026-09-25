@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
 import { useRegistration } from "@/hooks/use-registration";
 import { usePaymentFlow } from "@/hooks/use-payment-flow";
-import { getTicket } from "@/lib/event";
+import { getOption } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 import { CheckoutSurface } from "./checkout-surface";
 import { PaymentSummary } from "./payment-summary";
@@ -194,7 +194,7 @@ export function PaymentFlow({
               </>
             ) : (
               <>
-                <Lock /> Pay {formatNaira(getTicket(data.ticketType).priceNaira)}
+                <Lock /> Pay {formatNaira(getOption(data.optionId).priceNaira)}
               </>
             )}
           </Swap>

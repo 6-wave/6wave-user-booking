@@ -14,7 +14,7 @@ bun run build && bun start
 
 ## Before going live
 
-1. **Event details:** everything is in [lib/event.ts](lib/event.ts), taken from the flyer. Ticket prices are confirmed: **Regular ₦7,000, VIP ₦10,000** (there is no ₦5,000 ticket). Still worth confirming with the organizers: the year (inferred as 2026), the `knowBeforeYouGo` copy (including "pay at the gate"), and the registration-number prefix (`referencePrefix`, currently `WAVE`, so numbers look like `WAVE-83921`; the backend must issue the same prefix).
+1. **Event details and prices:** everything is in [lib/event.ts](lib/event.ts), taken from the flyer and the organizers: Regular ₦7,000, VIP ₦10,000, a **group of 5** (Regular ₦35,000 / VIP ₦50,000) and **tables** at ₦100k / ₦150k / ₦200k / ₦250k / ₦300k. **Wave 1** (25 September to 18 October) is announced; Wave 2 prices and dates are not, so add them to `waves` in [lib/event.ts](lib/event.ts) before 18 October, and assumed the current prices are the Wave 1 prices. Assumptions still to confirm: a group costs 5 × the single price (no discount); **each person in a group gets their own QR code** (the scanner marks each code used, so one shared code would admit only one person); a table is **one** QR code (if a table admits a set number of people, change its `admits` and every guest gets a code); the year (inferred as 2026); the `knowBeforeYouGo` copy (including "pay at the gate"); and the registration-number prefix (`referencePrefix`, currently `WAVE`, so numbers look like `WAVE-83921`; the backend must issue the same prefix).
 2. **Connect the backend:** see below.
 3. Delete `lib/api/mock/` and `components/payment/mock-checkout-sheet.tsx`.
 
@@ -40,7 +40,9 @@ All network access goes through two files; each function maps to one endpoint an
 
 Set `NEXT_PUBLIC_API_BASE_URL`, swap the mock call for the `apiFetch` line, and the types in [types/](types/) describe what the backend should return. Notes for the backend:
 
-- **Tickets:** `POST /api/registrations` takes `ticketType: "REGULAR" | "VIP"` (with `fullName`, `phone`, `email`), and the registration response echoes `ticketType`. The prices shown in the UI come from [lib/event.ts](lib/event.ts), but the **backend must own the price per tier** and use it for `POST /api/payments/initialize` (whose `amount` the UI shows in checkout). Never trust an amount sent from the browser.
+- **What was bought:** `POST /api/registrations` takes `optionId` (one of `regular`, `vip`, `regular-group`, `vip-group`, `table-100k`, `table-150k`, `table-200k`, `table-250k`, `table-300k`) plus `fullName`, `phone`, `email`; the registration response echoes `optionId`. The prices shown in the UI come from [lib/event.ts](lib/event.ts), but the **backend must own the price per option** and use it for `POST /api/payments/initialize` (whose `amount` the UI shows in checkout). Never trust an amount sent from the browser.
+- **Waves:** the site only *displays* the current wave ("Wave 1 · on sale until 18 October", from `waves` in [lib/event.ts](lib/event.ts), in Nigerian time, refreshed hourly). The **backend must own the sale windows and per-wave prices**, and reject or reprice a purchase outside them; the browser never decides.
+- **One QR per person:** `GET /api/registrations/:id/qr` returns `{ registrationId, tokens: string[] }`: one opaque token for a ticket or table, five for a group of 5. One payment covers the whole registration and activates all its codes together; the scanner marks each code used individually.
 - The registration response carries a **`displayName`** already shortened (e.g. "George O."); the UI never needs the full name, phone or email again.
 - The QR token is an **opaque, unpredictable string** from `GET …/qr`, rendered as-is. Nothing else is ever encoded in it.
 - Payment status shown in the UI is only what the backend reports. The frontend never marks anything paid itself.
@@ -52,12 +54,14 @@ The only file that changes is [components/payment/checkout-surface.tsx](componen
 
 ## Trying the mock
 
-Data lives in `localStorage` (key `soundwave:mock-db:v2`); clear it to reset.
+Data lives in `localStorage` (key `soundwave:mock-db:v3`); clear it to reset.
 
 | Do this | To see |
 | --- | --- |
 | Look up `WAVE-83921` + `08012345678` | A **paid VIP** registration |
 | Look up `WAVE-40417` + `08098765432` | A **pending Regular** registration you can pay for (₦7,000) |
+| Look up `WAVE-77015` + `08055556666` | A **pending Regular group of 5** with five QR codes (₦35,000) |
+| Look up `WAVE-62208` + `08033334444` | A **paid ₦150k table** |
 | Register with an email starting `error@` | Registration server error |
 | Look up `WAVE-00000` | Lookup server error |
 | Pay, then choose an outcome in the demo checkout | Success / failed / cancelled (success takes ~2.5s to "confirm", like a real webhook) |
@@ -74,10 +78,10 @@ types/        Registration, payment and event types
 
 ## Brand assets
 
-The 6ixwave Entertainment logo was extracted from the supplied image (background and drop shadow removed) and traced to vector, so it's crisp at any size. It is used in white on the dark UI:
+The logos were extracted from the supplied images (background removed) and traced to vector, so they're crisp at any size. They're used in white on the dark UI:
 
 - [public/brand/6ixwave-wordmark-white.svg](public/brand/6ixwave-wordmark-white.svg): header
-- [public/brand/6ixwave-logo-white.svg](public/brand/6ixwave-logo-white.svg): footer (with ENTERTAINMENT)
+- [public/brand/all-mask-gang-white.svg](public/brand/all-mask-gang-white.svg): footer (All Mask Gang)
 - [app/icon.svg](app/icon.svg), [app/favicon.ico](app/favicon.ico), [app/apple-icon.png](app/apple-icon.png): favicon set, a white "6IX" on a black tile (the full wordmark is too wide to read at tab size)
 
 If a higher-resolution or vector original exists, swap it into those files; it would be sharper than this trace of a screenshot.

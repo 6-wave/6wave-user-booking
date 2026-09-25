@@ -11,7 +11,7 @@ import { QrPanel } from "@/components/qr/qr-panel";
 import { Button } from "@/components/ui/button";
 import { useRegistration } from "@/hooks/use-registration";
 import { DetailList, DetailRow } from "./detail-list";
-import { TicketBadge } from "./ticket-badge";
+import { PurchaseBadge } from "./purchase-badge";
 import {
   ErrorCard,
   LoadingCard,
@@ -50,8 +50,8 @@ export function RegistrationSuccess({ id }: { id: string }) {
               {registration.reference}
             </span>
           </DetailRow>
-          <DetailRow label="Ticket">
-            <TicketBadge type={registration.ticketType} />
+          <DetailRow label="Purchase">
+            <PurchaseBadge optionId={registration.optionId} />
           </DetailRow>
           <DetailRow label="Payment">
             <PaymentBadge status={registration.paymentStatus} />

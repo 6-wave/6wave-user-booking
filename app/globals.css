@@ -218,7 +218,23 @@
   }
 }
 
+/* Printed passes: dark ink on white paper, whatever the on-screen theme. */
 @media print {
+  :root {
+    color-scheme: light;
+    --background: #fff;
+    --foreground: #16090a;
+    --card: #fff;
+    --card-foreground: #16090a;
+    --muted-foreground: #4b3f3d;
+    --border: #d9cfcc;
+    --secondary: #f1ecea;
+    --secondary-foreground: #16090a;
+    --success: #0a7a45;
+    --success-soft: #e3f7ec;
+    --warning-foreground: #6b4300;
+    --warning-soft: #fff1d6;
+  }
   html,
   body {
     background: #fff !important;

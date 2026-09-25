@@ -3,7 +3,6 @@ import type {
   RegistrationStatus,
 } from "@/types/registration";
 import type { PaymentTransactionStatus } from "@/types/payment";
-import type { TicketType } from "@/types/event";
 import { EVENT } from "@/lib/event";
 
 /**
@@ -18,10 +17,11 @@ export interface MockRegistration {
   fullName: string;
   phone: string;
   email: string;
-  ticketType: TicketType;
+  optionId: string;
   paymentStatus: PaymentStatus;
   status: RegistrationStatus;
-  qrToken: string;
+  /** One opaque token per person covered by the purchase. */
+  qrTokens: string[];
   createdAt: string;
 }
 
@@ -39,7 +39,7 @@ interface MockDb {
   payments: MockPayment[];
 }
 
-const STORAGE_KEY = "soundwave:mock-db:v2";
+const STORAGE_KEY = "soundwave:mock-db:v3";
 
 const SEED: MockDb = {
   registrations: [
@@ -49,10 +49,10 @@ const SEED: MockDb = {
       fullName: "George Omosigho",
       phone: "+2348012345678",
       email: "george@example.com",
-      ticketType: "VIP",
+      optionId: "vip",
       paymentStatus: "PAID",
       status: "CONFIRMED",
-      qrToken: "WAVE-2026-8f72a91b4c3d5e6f708192a3b4c5d6e7",
+      qrTokens: ["WAVE-2026-8f72a91b4c3d5e6f708192a3b4c5d6e7"],
       createdAt: "2026-09-01T09:00:00.000Z",
     },
     {
@@ -61,11 +61,41 @@ const SEED: MockDb = {
       fullName: "Amaka Nwosu",
       phone: "+2348098765432",
       email: "amaka@example.com",
-      ticketType: "REGULAR",
+      optionId: "regular",
       paymentStatus: "PENDING",
       status: "CONFIRMED",
-      qrToken: "WAVE-2026-3c9e1f0a7b2d4c6e8a5f1b3d9e7c2a40",
+      qrTokens: ["WAVE-2026-3c9e1f0a7b2d4c6e8a5f1b3d9e7c2a40"],
       createdAt: "2026-09-02T11:30:00.000Z",
+    },
+    {
+      id: "rg_demo_group_0003",
+      reference: "WAVE-77015",
+      fullName: "Chidi Okafor",
+      phone: "+2348055556666",
+      email: "chidi@example.com",
+      optionId: "regular-group",
+      paymentStatus: "PENDING",
+      status: "CONFIRMED",
+      qrTokens: [
+        "WAVE-2026-a1f0c7d2e94b4a6f8c31d5b70e2a9f01",
+        "WAVE-2026-b2e1d8c3fa5c5b70904e26c81f3bad12",
+        "WAVE-2026-c3f2e9d40b6d6c81a15f37d92a4cbe23",
+        "WAVE-2026-d40300ea1c7e7d92b260488a3b5dcf34",
+        "WAVE-2026-e51411fb2d8f8ea3c37159b44c6eda45",
+      ],
+      createdAt: "2026-09-03T14:10:00.000Z",
+    },
+    {
+      id: "rg_demo_table_0004",
+      reference: "WAVE-62208",
+      fullName: "Ngozi Adeyemi",
+      phone: "+2348033334444",
+      email: "ngozi@example.com",
+      optionId: "table-150k",
+      paymentStatus: "PAID",
+      status: "CONFIRMED",
+      qrTokens: ["WAVE-2026-f62522ac3e909fb4d4826ac55d7fdb56"],
+      createdAt: "2026-09-04T16:45:00.000Z",
     },
   ],
   payments: [],
@@ -104,6 +134,7 @@ export const makeId = (prefix: string) => `${prefix}_${randomHex(8)}`;
 
 /** In production the backend generates an unpredictable token like this. */
 export const makeQrToken = () => `${EVENT.referencePrefix}-2026-${randomHex(16)}`;
+export const makeQrTokens = (count: number) => Array.from({ length: count }, makeQrToken);
 
 export function makeReference(existing: Set<string>): string {
   let reference: string;

@@ -5,12 +5,15 @@ import { PageShell } from "@/components/layout/page-shell";
 import { RegistrationForm } from "@/components/registration/registration-form";
 import { ClubBanner } from "@/components/illustrations/club-banner";
 import { Reveal } from "@/components/motion/reveal";
-import { EVENT, LOWEST_PRICE } from "@/lib/event";
+import { EVENT, LOWEST_PRICE, isOptionId } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Register" };
 
-export default function RegisterPage() {
+export default async function RegisterPage(props: PageProps<"/register">) {
+  const { option } = await props.searchParams;
+  const initialOptionId = typeof option === "string" && isOptionId(option) ? option : undefined;
+
   return (
     <PageShell>
       <div>
@@ -37,7 +40,7 @@ export default function RegisterPage() {
         </Reveal>
 
         <Reveal delay={0.16} className="mt-6 card-pop rounded-3xl p-5 sm:p-6">
-          <RegistrationForm />
+          <RegistrationForm initialOptionId={initialOptionId} />
         </Reveal>
 
         <Reveal delay={0.22} className="mt-6 text-center text-sm text-muted-foreground">
