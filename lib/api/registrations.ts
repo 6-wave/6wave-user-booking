@@ -5,10 +5,6 @@ import type {
   RegistrationQr,
 } from "@/types/registration";
 import { apiFetch } from "./client";
-import * as mock from "./mock/registrations";
-
-// Every function here maps to one backend endpoint. To go live, replace the
-// mock call with the `apiFetch` line shown under each function.
 
 /** POST /api/registrations */
 export function createRegistration(
@@ -21,9 +17,8 @@ export function createRegistration(
 export function lookupRegistration(
   input: LookupRegistrationInput,
 ): Promise<Registration> {
-  return mock.lookupRegistration(input);
-  // const query = new URLSearchParams(input).toString();
-  // return apiFetch<Registration>(`/api/registrations/lookup?${query}`);
+  const query = new URLSearchParams({ reference: input.reference, phone: input.phone }).toString();
+  return apiFetch<Registration>(`/api/registrations/lookup?${query}`);
 }
 
 /** GET /api/registrations/:id */
