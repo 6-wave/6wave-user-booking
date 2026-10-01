@@ -8,7 +8,7 @@ import type { PaymentStatus } from "@/types/registration";
 const COPY = {
   PENDING: {
     title: "Payment Pending",
-    body: "Your registration has been created. Complete payment to activate your event access.",
+    body: "Your registration has been created. Pay by bank transfer, then send your receipt on WhatsApp and we'll confirm it.",
     icon: Clock,
     style: "border-warning/30 bg-warning-soft text-warning-foreground",
   },

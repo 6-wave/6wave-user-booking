@@ -56,5 +56,13 @@ export interface EventInfo {
   /** Teaser tags from the flyer, e.g. "Hype policy: undisclosed". */
   teasers: { label: string; value: string }[];
   reservations: { display: string; tel: string }[];
+  /** Where to send a bank transfer, until online payment is ready. */
+  payment: {
+    bank: string;
+    accountNumber: string;
+    accountName: string;
+    /** Receipts go here: shown as `display`, opened with `waNumber` (international, no +). */
+    whatsapp: { display: string; waNumber: string };
+  };
   knowBeforeYouGo: { title: string; body: string }[];
 }

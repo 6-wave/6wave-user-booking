@@ -74,6 +74,12 @@ export const EVENT: EventInfo = {
     { display: "0812 609 0254", tel: "+2348126090254" },
     { display: "0816 639 5695", tel: "+2348166395695" },
   ],
+  payment: {
+    bank: "Moniepoint",
+    accountNumber: "8166395695",
+    accountName: "Akinyemi Tolulope Adewale",
+    whatsapp: { display: "0816 639 5695", waNumber: "2348166395695" },
+  },
   knowBeforeYouGo: [
     {
       title: "Your QR is your ticket",
@@ -84,8 +90,8 @@ export const EVENT: EventInfo = {
       body: "Your QR code can only be used once, so keep it to yourself.",
     },
     {
-      title: "Pay online or at the gate",
-      body: "You can pay now, or pay at the venue. Your QR code stays the same either way.",
+      title: "Pay by transfer",
+      body: "Transfer to our account and send your receipt on WhatsApp. If you haven't been marked as paid by the night, show your receipt at the gate. Your QR code stays the same either way.",
     },
     {
       title: "Get there early",

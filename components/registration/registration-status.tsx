@@ -134,11 +134,11 @@ export function RegistrationStatus({ id }: { id: string }) {
         <StaggerItem className="print:hidden">
           <Button asChild size="lg" className="w-full">
             <Link href={`/payment/${registration.id}`}>
-              Complete Payment <ArrowRight />
+              How to Pay <ArrowRight />
             </Link>
           </Button>
           <p className="mt-3 text-center text-sm text-muted-foreground">
-            Prefer to pay at the gate? Your QR code stays the same.
+            Pay by bank transfer and send your receipt on WhatsApp. Your QR code stays the same.
           </p>
         </StaggerItem>
       ) : null}

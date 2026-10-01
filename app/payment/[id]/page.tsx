@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
-import { PaymentComingSoon } from "@/components/payment/payment-coming-soon";
+import { PaymentInstructions } from "@/components/payment/payment-instructions";
 
 export const metadata: Metadata = { title: "Payment" };
 
@@ -18,7 +18,7 @@ export default async function PaymentPage(props: PageProps<"/payment/[id]">) {
         <ArrowLeft className="size-4" aria-hidden="true" /> My registration
       </Link>
       <h1 className="mt-4 mb-6 text-3xl font-bold">Payment</h1>
-      <PaymentComingSoon />
+      <PaymentInstructions id={id} />
     </PageShell>
   );
 }
