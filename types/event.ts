@@ -9,7 +9,7 @@ export interface PurchaseOption {
   label: string;
   /** One line of explanation, e.g. "1 person" or "5 people · 5 QR codes". */
   description: string;
-  /** Price in Naira. The backend is the authority on what is actually charged. */
+  /** Price in Naira for the wave on sale. The backend is the authority on what is actually charged. */
   priceNaira: number;
   /** How many QR codes (people) this purchase covers. */
   admits: number;
@@ -17,16 +17,16 @@ export interface PurchaseOption {
   premium: boolean;
 }
 
-/** A phase of ticket sales (Wave 1, Wave 2, ...). Display-only on the frontend. */
+/** A phase of ticket sales (Wave 1, Wave 2, D Day). Display-only on the frontend. */
 export interface SaleWave {
   id: string;
   label: string;
-  /** First day on sale, "YYYY-MM-DD" (Nigerian time). */
-  startsOn: string;
-  /** Last day on sale, "YYYY-MM-DD" (Nigerian time), inclusive. */
-  endsOn: string;
-  /** The end date as written for people, e.g. "18 October". */
-  endsLabel: string;
+  /** Last day on sale, "YYYY-MM-DD" (Nigerian time), inclusive. Null for the last wave. */
+  endsOn: string | null;
+  /** The end date as written for people, e.g. "20 October". Null when it has no end. */
+  endsLabel: string | null;
+  /** Price in Naira per option ID. */
+  prices: Record<string, number>;
 }
 
 export interface EventInfo {
@@ -49,9 +49,9 @@ export interface EventInfo {
   timeLabel: string;
   venue: string;
   address: string;
-  /** Everything on sale, in display order. */
-  options: PurchaseOption[];
-  /** Sale phases, in order. Only Wave 1 is announced so far. */
+  /** Everything on sale, in display order. Prices come from `waves`. */
+  options: Omit<PurchaseOption, "priceNaira">[];
+  /** Sale phases, in date order. The last one has no end date. */
   waves: SaleWave[];
   /** Teaser tags from the flyer, e.g. "Hype policy: undisclosed". */
   teasers: { label: string; value: string }[];

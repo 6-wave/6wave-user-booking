@@ -5,7 +5,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { RegistrationForm } from "@/components/registration/registration-form";
 import { ClubBanner } from "@/components/illustrations/club-banner";
 import { Reveal } from "@/components/motion/reveal";
-import { EVENT, LOWEST_PRICE, isOptionId } from "@/lib/event";
+import { EVENT, getLowestPrice, isOptionId } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Register" };
@@ -29,7 +29,7 @@ export default async function RegisterPage(props: PageProps<"/register">) {
         <Reveal delay={0.06} className="mt-4">
           <ClubBanner
             title="Register"
-            pill={`From ${formatNaira(LOWEST_PRICE)}`}
+            pill={`From ${formatNaira(getLowestPrice())}`}
           />
         </Reveal>
 

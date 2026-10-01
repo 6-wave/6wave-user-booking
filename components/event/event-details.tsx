@@ -1,6 +1,6 @@
 import { Banknote, CalendarDays, MapPin, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
-import { EVENT, LOWEST_PRICE, getCurrentWave } from "@/lib/event";
+import { EVENT, getCurrentWave, getLowestPrice } from "@/lib/event";
 import { formatNaira } from "@/lib/format";
 
 function DetailCard({
@@ -70,12 +70,8 @@ export function EventDetails() {
             icon={Banknote}
             tint="bg-cream text-ink"
             label="Tickets"
-            value={`From ${formatNaira(LOWEST_PRICE)}`}
-            hint={
-              wave
-                ? `${wave.label} · until ${wave.endsLabel}`
-                : "Tickets, groups of 5 and tables"
-            }
+            value={`From ${formatNaira(getLowestPrice())}`}
+            hint={wave.endsLabel ? `${wave.label} · until ${wave.endsLabel}` : `${wave.label} prices`}
           />
         </Reveal>
       </div>

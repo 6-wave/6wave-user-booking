@@ -2,10 +2,9 @@ import { Clock } from "lucide-react";
 import { getCurrentWave } from "@/lib/event";
 import { cn } from "@/lib/utils";
 
-/** "Wave 1 · on sale until 18 October", only while a wave is running. */
+/** "Wave 1 · on sale until 20 October", or "D Day · final prices" once the last wave starts. */
 export function WaveNotice({ className }: { className?: string }) {
   const wave = getCurrentWave();
-  if (!wave) return null;
   return (
     <p
       className={cn(
@@ -16,7 +15,7 @@ export function WaveNotice({ className }: { className?: string }) {
       <Clock className="size-4 text-primary" aria-hidden="true" />
       {wave.label}
       <span className="font-medium text-muted-foreground">
-        · on sale until {wave.endsLabel}
+        {wave.endsLabel ? `· on sale until ${wave.endsLabel}` : "· final prices"}
       </span>
     </p>
   );

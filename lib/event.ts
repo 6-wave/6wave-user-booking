@@ -5,19 +5,31 @@ import type {
   SaleWave,
 } from "@/types/event";
 
+/** Tables cost the same in every wave. */
+function prices(regular: number, vip: number, regularGroup: number, vipGroup: number): Record<string, number> {
+  return {
+    regular,
+    vip,
+    "regular-group": regularGroup,
+    "vip-group": vipGroup,
+    "table-100k": 100000,
+    "table-150k": 150000,
+    "table-200k": 200000,
+    "table-250k": 250000,
+    "table-300k": 300000,
+  };
+}
+
 /**
  * Single source of truth for event details shown across the app. Taken from
  * the official flyer.
  *
- * Prices confirmed by the organizers: Regular ₦7,000, VIP ₦10,000, tables ₦100k to
- * ₦300k, and a group purchase of 5 people. Wave 1 runs 25 September to 18 October;
- * the current prices are assumed to be the Wave 1 prices.
- *
- * TODO(organizers): Wave 2 prices and dates are not decided yet. Add them to
- * `waves` (and give each wave its prices) before 18 October.
+ * Prices confirmed by the organizers, per wave (see `waves`): Wave 1 to 20 October,
+ * Wave 2 from 21 to 30 October, D Day (31 October) after that. A group of 5 is 10%
+ * cheaper than 5 tickets. Tables cost the same in every wave. The backend holds the
+ * same schedule and is the one that charges: keep the two in step.
  *
  * TODO(organizers), assumptions to confirm:
- *  - a group of 5 costs 5 × the single price (no group discount);
  *  - each person in a group gets their own QR code (the gate scanner marks
  *    each QR as used, so one shared code would only admit one person);
  *  - a table is one QR code. If a table admits a set number of people, change
@@ -39,18 +51,20 @@ export const EVENT: EventInfo = {
   venue: "Jinos Lounge/Club",
   address: "5/7 Johnson Street, Onike, Sabo, Yaba.",
   options: [
-    { id: "regular", kind: "TICKET", label: "Regular", description: "1 person", priceNaira: 7000, admits: 1, premium: false },
-    { id: "vip", kind: "TICKET", label: "VIP", description: "1 person", priceNaira: 10000, admits: 1, premium: true },
-    { id: "regular-group", kind: "GROUP", label: "Regular group", description: "5 people", priceNaira: 7000 * 5, admits: 5, premium: false },
-    { id: "vip-group", kind: "GROUP", label: "VIP group", description: "5 people", priceNaira: 10000 * 5, admits: 5, premium: true },
-    { id: "table-100k", kind: "TABLE", label: "Table ₦100k", description: "Reserved table", priceNaira: 100000, admits: 1, premium: true },
-    { id: "table-150k", kind: "TABLE", label: "Table ₦150k", description: "Reserved table", priceNaira: 150000, admits: 1, premium: true },
-    { id: "table-200k", kind: "TABLE", label: "Table ₦200k", description: "Reserved table", priceNaira: 200000, admits: 1, premium: true },
-    { id: "table-250k", kind: "TABLE", label: "Table ₦250k", description: "Reserved table", priceNaira: 250000, admits: 1, premium: true },
-    { id: "table-300k", kind: "TABLE", label: "Table ₦300k", description: "Reserved table", priceNaira: 300000, admits: 1, premium: true },
+    { id: "regular", kind: "TICKET", label: "Regular", description: "1 person", admits: 1, premium: false },
+    { id: "vip", kind: "TICKET", label: "VIP", description: "1 person", admits: 1, premium: true },
+    { id: "regular-group", kind: "GROUP", label: "Regular group", description: "5 people", admits: 5, premium: false },
+    { id: "vip-group", kind: "GROUP", label: "VIP group", description: "5 people", admits: 5, premium: true },
+    { id: "table-100k", kind: "TABLE", label: "Table ₦100k", description: "Reserved table", admits: 1, premium: true },
+    { id: "table-150k", kind: "TABLE", label: "Table ₦150k", description: "Reserved table", admits: 1, premium: true },
+    { id: "table-200k", kind: "TABLE", label: "Table ₦200k", description: "Reserved table", admits: 1, premium: true },
+    { id: "table-250k", kind: "TABLE", label: "Table ₦250k", description: "Reserved table", admits: 1, premium: true },
+    { id: "table-300k", kind: "TABLE", label: "Table ₦300k", description: "Reserved table", admits: 1, premium: true },
   ],
   waves: [
-    { id: "wave-1", label: "Wave 1", startsOn: "2026-09-25", endsOn: "2026-10-18", endsLabel: "18 October" },
+    { id: "wave-1", label: "Wave 1", endsOn: "2026-10-20", endsLabel: "20 October", prices: prices(5000, 15000, 22500, 67500) },
+    { id: "wave-2", label: "Wave 2", endsOn: "2026-10-30", endsLabel: "30 October", prices: prices(7000, 18000, 32500, 81000) },
+    { id: "d-day", label: "D Day", endsOn: null, endsLabel: null, prices: prices(10000, 20000, 45000, 90000) },
   ],
   teasers: [
     { label: "Hype policy", value: "Undisclosed" },
@@ -88,24 +102,26 @@ export const OPTION_KINDS: { kind: PurchaseKind; label: string }[] = [
   { kind: "TABLE", label: "Table" },
 ];
 
-export function getOption(id: string): PurchaseOption {
-  return (
+export function getOption(id: string, now: Date = new Date()): PurchaseOption {
+  const base =
     EVENT.options.find((o) => o.id === id) ??
     EVENT.options.find((o) => o.id === DEFAULT_OPTION_ID) ??
-    EVENT.options[0]
-  );
+    EVENT.options[0];
+  return { ...base, priceNaira: getCurrentWave(now).prices[base.id] };
 }
 
 export function isOptionId(id: string | undefined): id is string {
   return !!id && EVENT.options.some((o) => o.id === id);
 }
 
-export function optionsOfKind(kind: PurchaseKind): PurchaseOption[] {
-  return EVENT.options.filter((o) => o.kind === kind);
+export function optionsOfKind(kind: PurchaseKind, now: Date = new Date()): PurchaseOption[] {
+  return EVENT.options.filter((o) => o.kind === kind).map((o) => getOption(o.id, now));
 }
 
-/** Lowest price on sale, for "From ₦7,000". */
-export const LOWEST_PRICE = Math.min(...EVENT.options.map((o) => o.priceNaira));
+/** Lowest price on sale right now, for "From ₦5,000". */
+export function getLowestPrice(now: Date = new Date()): number {
+  return Math.min(...Object.values(getCurrentWave(now).prices));
+}
 
 /**
  * Today's date in Nigeria ("YYYY-MM-DD"). The event is in Lagos, so a wave
@@ -116,10 +132,10 @@ function todayInLagos(now: Date): string {
 }
 
 /**
- * The wave on sale right now, or undefined between or after waves. Display
- * only: the backend decides what is actually on sale and at what price.
+ * The wave on sale right now. The last wave has no end, so there is always one.
+ * Display only: the backend decides what is actually on sale and at what price.
  */
-export function getCurrentWave(now: Date = new Date()): SaleWave | undefined {
+export function getCurrentWave(now: Date = new Date()): SaleWave {
   const today = todayInLagos(now);
-  return EVENT.waves.find((w) => w.startsOn <= today && today <= w.endsOn);
+  return EVENT.waves.find((w) => w.endsOn === null || today <= w.endsOn) ?? EVENT.waves[EVENT.waves.length - 1];
 }
