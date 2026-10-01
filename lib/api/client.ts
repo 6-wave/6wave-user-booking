@@ -39,6 +39,12 @@ export async function apiFetch<T>(
     throw new ApiError("Can't reach the server. Check your connection.", 0);
   }
 
+  if (response.status === 409) {
+    // The backend's own wording (e.g. "already registered") is safe to show as is.
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new ApiError(body?.error ?? "This has already been done.", 409);
+  }
+
   if (!response.ok) {
     throw new ApiError(
       response.status === 404
